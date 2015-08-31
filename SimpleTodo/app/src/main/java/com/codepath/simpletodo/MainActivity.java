@@ -10,17 +10,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    ArrayList<String> items;
+    TodoListDbHelper dbHelper;
+    ArrayList<String> itemNames;
     ArrayAdapter<String> itemsAdapter;
     ListView lvItems;
     int editedItemPosition;
@@ -30,14 +27,24 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        lvItems = (ListView) findViewById(R.id.lvItems);
-        readItems();
-        itemsAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, items);
-        lvItems.setAdapter(itemsAdapter);
+        updateListView();
         setupListViewListeners();
     }
 
+    private void updateListView() {
+        dbHelper = TodoListDbHelper.getInstance(this);
+        List<TodoItem> itemList = dbHelper.getAllItems();
+
+        lvItems = (ListView) findViewById(R.id.lvItems);
+        itemNames = new ArrayList<>();
+
+        for(int i = 0; i < itemList.size(); i++) {
+            itemNames.add(itemList.get(i).name);
+        }
+
+        itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, itemNames);
+        lvItems.setAdapter(itemsAdapter);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -66,7 +73,8 @@ public class MainActivity extends ActionBarActivity {
         String itemText = etNewItem.getText().toString();
         itemsAdapter.add(itemText);
         etNewItem.setText("");
-        writeItems();
+        TodoItem newItem = new TodoItem(itemText, " temp desc", false);
+        dbHelper.addItem(newItem);
     }
 
     private void setupListViewListeners() {
@@ -76,7 +84,7 @@ public class MainActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 editedItemPosition = position;
                 Intent editItemIntent = new Intent(MainActivity.this, EditItemActivity.class);
-                editItemIntent.putExtra("itemName", items.get(position));
+                editItemIntent.putExtra("itemName", itemNames.get(position));
                 startActivityForResult(editItemIntent, 1);
             }
         });
@@ -85,41 +93,27 @@ public class MainActivity extends ActionBarActivity {
                 new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
-                items.remove(pos);
+                TodoItem deletedItem = dbHelper.getItem(itemNames.get(pos));
+                itemNames.remove(pos);
                 itemsAdapter.notifyDataSetChanged();
-                writeItems();
+                dbHelper.deleteItem(deletedItem);
                 return true;
             }
         });
-    }
-
-    private void readItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
-        } catch (IOException e) {
-            items = new ArrayList<>();
-        }
-    }
-
-    private void writeItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            FileUtils.writeLines(todoFile, items);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(data != null && data.getStringExtra("newItemName") != null) {
             String newItemName = data.getStringExtra("newItemName");
-            items.set(editedItemPosition, newItemName);
+            String oldItemName = itemNames.get(editedItemPosition);
+
+            itemNames.set(editedItemPosition, newItemName);
             itemsAdapter.notifyDataSetChanged();
-            writeItems();
+
+            TodoItem updatedItem = dbHelper.getItem(oldItemName);
+            updatedItem.name = newItemName;
+            dbHelper.updateItem(oldItemName, updatedItem);
         }
     }
 }
