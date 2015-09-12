@@ -114,12 +114,12 @@ public class TodoListDbHelper extends SQLiteOpenHelper{
         return allItems;
     }
 
-    public void updateItem(String oldName, TodoItem item) {
+    public void updateItem(TodoItem oldItem, TodoItem newItem) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = createKeyValuePairs(item);
+        ContentValues values = createKeyValuePairs(newItem);
 
-        db.update(TodoItemContract.TodoItemEntry.TABLE_NAME, values, TodoItemContract.TodoItemEntry.COLUMN_NAME + " = ?", new String[] { String.valueOf(oldName)});
+        db.update(TodoItemContract.TodoItemEntry.TABLE_NAME, values, TodoItemContract.TodoItemEntry.COLUMN_NAME + " = ?", new String[] { String.valueOf(oldItem.name)});
     }
 
     public void deleteItem(TodoItem item) {
