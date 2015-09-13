@@ -106,7 +106,8 @@ public class TodoListDbHelper extends SQLiteOpenHelper{
 
         if(cursor.moveToFirst()) {
             do {
-                TodoItem item = new TodoItem(cursor.getString(1), cursor.getString(2), Boolean.parseBoolean(cursor.getString(3)));
+                String st = cursor.getString(3);
+                TodoItem item = new TodoItem(cursor.getString(1), cursor.getString(2), Integer.parseInt(cursor.getString(3)) != 0);
                 allItems.add(item);
             } while (cursor.moveToNext());
         }

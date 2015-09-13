@@ -47,14 +47,45 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Item Status"
+        android:id="@+id/textView"
+        android:layout_below="@+id/txt_desc"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="36dp" />
+
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/textView"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" >
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pending"
+            android:id="@+id/radioButtonPending" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Complete"
+            android:id="@+id/radioButtonComplete" />
+    </RadioGroup>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Save"
         android:id="@+id/save_button"
-        android:layout_centerVertical="true"
-        android:layout_alignRight="@id/lbl_desc"
-        android:layout_alignEnd="@id/lbl_desc" />
+        android:layout_below="@+id/txt_desc"
+        android:layout_alignRight="@+id/lbl_desc"
+        android:layout_alignEnd="@+id/lbl_desc"
+        android:layout_marginTop="130dp" />
 
     <Button
         android:layout_width="wrap_content"

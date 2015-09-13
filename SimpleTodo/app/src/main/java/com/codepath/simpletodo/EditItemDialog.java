@@ -9,6 +9,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 
 /**
  * Created by Himanshu on 9/13/2015.
@@ -17,6 +18,8 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
 
     private EditText mEditName;
     private EditText mEditDesc;
+    private RadioButton mButtonPending;
+    private RadioButton mButtonComplete;
 
     public EditItemDialog() {}
 
@@ -36,6 +39,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
         args.putString("title", null);
         args.putString("name", item.name);
         args.putString("desc", item.description);
+        args.putBoolean("status", item.status);
         frag.setArguments(args);
         return frag;
     }
@@ -45,12 +49,17 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.fragment_edit_item, container);
         mEditName = (EditText) view.findViewById(R.id.txt_name);
         mEditDesc = (EditText) view.findViewById(R.id.txt_desc);
+        mButtonPending = (RadioButton) view.findViewById(R.id.radioButtonPending);
+        mButtonComplete = (RadioButton) view.findViewById(R.id.radioButtonComplete);
         String title = getArguments().getString("title", "Edit Item");
         String name = getArguments().getString("name", "");
         String desc = getArguments().getString("desc", "");
+        Boolean status = getArguments().getBoolean("status", false);
         getDialog().setTitle(title);
         mEditName.setText(name);
         mEditDesc.setText(desc);
+        mButtonPending.setChecked(!status);
+        mButtonComplete.setChecked(status);
         mEditDesc.requestFocus();
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         Button saveButton = (Button) view.findViewById(R.id.save_button);
@@ -66,7 +75,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
 
             case R.id.save_button:
                 EditItemDialogListener listener = (EditItemDialogListener) getActivity();
-                TodoItem newItem = new TodoItem(mEditName.getText().toString(), mEditDesc.getText().toString(), false);
+                TodoItem newItem = new TodoItem(mEditName.getText().toString(), mEditDesc.getText().toString(), mButtonComplete.isChecked());
                 listener.onFinishEditDialog(newItem);
                 dismiss();
                 break;
