@@ -1,5 +1,6 @@
 package com.codepath.simpletodo;
 
+import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -7,14 +8,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements EditItemDialog.EditItemDialogListener{
 
     TodoListDbHelper dbHelper;
     ArrayList<TodoItem> arrayOfItems;
@@ -71,10 +71,23 @@ public class MainActivity extends ActionBarActivity {
     public void onAddItem(View v) {
         EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
         String itemText = etNewItem.getText().toString();
-        TodoItem newItem = new TodoItem(itemText, "temp desc", false);
+        TodoItem newItem = new TodoItem(itemText, "", false);
         itemsAdapter.add(newItem);
+        editedItemPosition = itemsAdapter.getPosition(newItem);
         dbHelper.addItem(newItem);
         etNewItem.setText("");
+        showEditItemDialog(newItem);
+    }
+
+    private void showEditItemDialog(TodoItem item) {
+        FragmentManager fm = getSupportFragmentManager();
+        EditItemDialog editItemDialog = EditItemDialog.newInstance(item);
+        editItemDialog.show(fm, "fragment_edit_item");
+
+        // Old way of using activity instead of fragment
+//        Intent editItemIntent = new Intent(MainActivity.this, EditItemActivity.class);
+//        editItemIntent.putExtra("itemName", item.name);
+//        startActivityForResult(editItemIntent, 1);
     }
 
     private void setupListViewListeners() {
@@ -83,9 +96,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 editedItemPosition = position;
-                Intent editItemIntent = new Intent(MainActivity.this, EditItemActivity.class);
-                editItemIntent.putExtra("itemName", arrayOfItems.get(position).name);
-                startActivityForResult(editItemIntent, 1);
+                showEditItemDialog(arrayOfItems.get(position));
             }
         });
 
@@ -102,17 +113,25 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if(data != null && data.getStringExtra("newItemName") != null) {
+//            String newItemName = data.getStringExtra("newItemName");
+//            TodoItem oldItem = arrayOfItems.get(editedItemPosition);
+//            TodoItem newItem = new TodoItem(newItemName, oldItem.description, oldItem.status);
+//
+//            arrayOfItems.set(editedItemPosition, newItem);
+//            itemsAdapter.notifyDataSetChanged();
+//
+//            dbHelper.updateItem(oldItem, newItem);
+//        }
+//    }
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(data != null && data.getStringExtra("newItemName") != null) {
-            String newItemName = data.getStringExtra("newItemName");
-            TodoItem oldItem = arrayOfItems.get(editedItemPosition);
-            TodoItem newItem = new TodoItem(newItemName, oldItem.description, oldItem.status);
-
-            arrayOfItems.set(editedItemPosition, newItem);
-            itemsAdapter.notifyDataSetChanged();
-
-            dbHelper.updateItem(oldItem, newItem);
-        }
+    public void onFinishEditDialog(TodoItem newItem) {
+        TodoItem oldItem = arrayOfItems.get(editedItemPosition);
+        arrayOfItems.set(editedItemPosition, newItem);
+        itemsAdapter.notifyDataSetChanged();
+        dbHelper.updateItem(oldItem, newItem);
     }
 }

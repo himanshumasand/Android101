@@ -8,9 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import java.util.ArrayList;
-
-
 public class EditItemActivity extends ActionBarActivity {
 
     String itemName;
