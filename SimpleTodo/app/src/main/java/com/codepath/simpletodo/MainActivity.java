@@ -8,13 +8,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends ActionBarActivity implements EditItemDialog.EditItemDialogListener{
+public class MainActivity extends ActionBarActivity implements EditItemDialog.EditItemDialogListener, View.OnClickListener {
 
     TodoListDbHelper dbHelper;
     ArrayList<TodoItem> arrayOfItems;
@@ -26,9 +27,7 @@ public class MainActivity extends ActionBarActivity implements EditItemDialog.Ed
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         updateListView();
-        setupListViewListeners();
     }
 
     private void updateListView() {
@@ -44,6 +43,7 @@ public class MainActivity extends ActionBarActivity implements EditItemDialog.Ed
 
         itemsAdapter = new TodoItemAdapter(this, arrayOfItems);
         lvItems.setAdapter(itemsAdapter);
+        lvItems.setItemsCanFocus(true);
     }
 
     @Override
@@ -83,48 +83,29 @@ public class MainActivity extends ActionBarActivity implements EditItemDialog.Ed
         FragmentManager fm = getSupportFragmentManager();
         EditItemDialog editItemDialog = EditItemDialog.newInstance(item);
         editItemDialog.show(fm, "fragment_edit_item");
-
-        // Old way of using activity instead of fragment
-//        Intent editItemIntent = new Intent(MainActivity.this, EditItemActivity.class);
-//        editItemIntent.putExtra("itemName", item.name);
-//        startActivityForResult(editItemIntent, 1);
     }
 
-    private void setupListViewListeners() {
-        lvItems.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                editedItemPosition = position;
-                showEditItemDialog(arrayOfItems.get(position));
-            }
-        });
-
-        lvItems.setOnItemLongClickListener(
-                new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
-                TodoItem deletedItem = arrayOfItems.get(pos);
-                arrayOfItems.remove(pos);
-                itemsAdapter.notifyDataSetChanged();
-                dbHelper.deleteItem(deletedItem);
-                return true;
-            }
-        });
-    }
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if(data != null && data.getStringExtra("newItemName") != null) {
-//            String newItemName = data.getStringExtra("newItemName");
-//            TodoItem oldItem = arrayOfItems.get(editedItemPosition);
-//            TodoItem newItem = new TodoItem(newItemName, oldItem.description, oldItem.status);
+//    private void setupListViewListeners() {
+//        lvItems.setOnItemClickListener(
+//                new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                editedItemPosition = position;
+//                showEditItemDialog(arrayOfItems.get(position));
+//            }
+//        });
 //
-//            arrayOfItems.set(editedItemPosition, newItem);
-//            itemsAdapter.notifyDataSetChanged();
-//
-//            dbHelper.updateItem(oldItem, newItem);
-//        }
+//        lvItems.setOnItemLongClickListener(
+//                new AdapterView.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
+//                TodoItem deletedItem = arrayOfItems.get(pos);
+//                arrayOfItems.remove(pos);
+//                itemsAdapter.notifyDataSetChanged();
+//                dbHelper.deleteItem(deletedItem);
+//                return true;
+//            }
+//        });
 //    }
 
     @Override
@@ -133,5 +114,33 @@ public class MainActivity extends ActionBarActivity implements EditItemDialog.Ed
         arrayOfItems.set(editedItemPosition, newItem);
         itemsAdapter.notifyDataSetChanged();
         dbHelper.updateItem(oldItem, newItem);
+    }
+
+    @Override
+    /**
+     * Handles clicking the checkbox for an item
+     */
+    public void onClick(View v) {
+
+        editedItemPosition = lvItems.getPositionForView(v);
+        TodoItem itemClicked = arrayOfItems.get(editedItemPosition);
+        switch (v.getId()) {
+
+            case R.id.tvName:
+                itemClicked.status = !itemClicked.status;
+                onFinishEditDialog(itemClicked);
+                break;
+
+            case R.id.editButton:
+                showEditItemDialog(itemClicked);
+                break;
+
+            case R.id.deleteButton:
+                arrayOfItems.remove(editedItemPosition);
+                itemsAdapter.notifyDataSetChanged();
+                dbHelper.deleteItem(itemClicked);
+                break;
+        }
+
     }
 }
