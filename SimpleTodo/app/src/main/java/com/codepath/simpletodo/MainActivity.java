@@ -1,14 +1,11 @@
 package com.codepath.simpletodo;
 
 import android.support.v4.app.FragmentManager;
-import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import java.util.ArrayList;
@@ -43,7 +40,6 @@ public class MainActivity extends ActionBarActivity implements EditItemDialog.Ed
 
         itemsAdapter = new TodoItemAdapter(this, arrayOfItems);
         lvItems.setAdapter(itemsAdapter);
-        lvItems.setItemsCanFocus(true);
     }
 
     @Override
@@ -85,29 +81,6 @@ public class MainActivity extends ActionBarActivity implements EditItemDialog.Ed
         editItemDialog.show(fm, "fragment_edit_item");
     }
 
-//    private void setupListViewListeners() {
-//        lvItems.setOnItemClickListener(
-//                new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                editedItemPosition = position;
-//                showEditItemDialog(arrayOfItems.get(position));
-//            }
-//        });
-//
-//        lvItems.setOnItemLongClickListener(
-//                new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
-//                TodoItem deletedItem = arrayOfItems.get(pos);
-//                arrayOfItems.remove(pos);
-//                itemsAdapter.notifyDataSetChanged();
-//                dbHelper.deleteItem(deletedItem);
-//                return true;
-//            }
-//        });
-//    }
-
     @Override
     public void onFinishEditDialog(TodoItem newItem) {
         TodoItem oldItem = arrayOfItems.get(editedItemPosition);
@@ -141,6 +114,5 @@ public class MainActivity extends ActionBarActivity implements EditItemDialog.Ed
                 dbHelper.deleteItem(itemClicked);
                 break;
         }
-
     }
 }

@@ -29,6 +29,8 @@ The following **optional** features are implemented:
 The following **additional** features are implemented:
 
 * [x] Back button takes the user from EditActivity to MainActivity without modifying the text.
+* [x] Adding checkboxes for updating item status
+* [x] Adding image buttons for edit and delete user actions instead of using different click listeners
 
 ## Notes
 
